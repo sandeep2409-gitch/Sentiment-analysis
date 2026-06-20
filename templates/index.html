@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S&E A // Sentiment & Emotion Analyzer</title>
+    <meta name="description"
+        content="An advanced NLP tool analyzing text emotions and sentiment with sentence-level granular breakdown.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <!-- Floating Emoji Particle Container -->
+    <div id="emoji-rain-container" class="emoji-rain-container"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-brain-circuit"></i></div>
+                <div class="logo-text">
+                    <h1>S &A E </h1>
+                    <span>SENTIMENT & EMOTION INTELLIGENCE</span>
+                </div>
+            </div>
+            <div class="model-status-badge" id="model-status-container">
+                <span class="status-dot pulsing"></span>
+                <span class="status-text" id="model-status-text">INITIALIZING...</span>
+                <span class="device-text" id="device-text">CPU</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            <!-- Left Side: Input & Controls -->
+            <section class="control-panel">
+                <div class="card glass-card">
+                    <div class="card-header">
+                        <h2><i class="fa-regular fa-keyboard"></i> Input Console</h2>
+                        <div class="header-actions">
+                            <button id="clear-btn" class="btn btn-secondary-icon" title="Clear Text"><i
+                                    class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="textarea-wrapper">
+                        <textarea id="text-input"
+                            placeholder="Type or paste text here to analyze its emotional aura (minimum 2 words)..."
+                            maxlength="5000"></textarea>
+                        <div class="text-stats">
+                            <span id="char-counter">0 / 5000 chars</span>
+                            <span id="word-counter">0 words</span>
+                        </div>
+                    </div>
+
+                    <div class="input-actions">
+                        <button id="analyze-btn" class="btn btn-primary" disabled>
+                            <span class="btn-text">Analyze Emotion</span>
+                            <span class="btn-loader"><i class="fa-solid fa-circle-notch fa-spin"></i></span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Presets -->
+                <div class="card glass-card presets-card">
+                    <div class="card-header">
+                        <h3><i class="fa-regular fa-lightbulb"></i> Try Emotion Presets</h3>
+                    </div>
+                    <div class="presets-grid">
+                        <button class="preset-btn" data-preset="joy">
+                            <span class="emoji">😊</span>
+                            <span class="label">Joyful Praise</span>
+                        </button>
+                        <button class="preset-btn" data-preset="anger">
+                            <span class="emoji">😠</span>
+                            <span class="label">Angry Complaint</span>
+                        </button>
+                        <button class="preset-btn" data-preset="sadness">
+                            <span class="emoji">😢</span>
+                            <span class="label">Melancholic Reflection</span>
+                        </button>
+                        <button class="preset-btn" data-preset="fear">
+                            <span class="emoji">😨</span>
+                            <span class="label">Anxious Dread</span>
+                        </button>
+                        <button class="preset-btn" data-preset="surprise">
+                            <span class="emoji">😲</span>
+                            <span class="label">Amazed Discovery</span>
+                        </button>
+                        <button class="preset-btn" data-preset="disgust">
+                            <span class="emoji">🤢</span>
+                            <span class="label">Averse Dislike</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Results & Dashboard -->
+            <section class="results-panel">
+                <!-- Welcome/Placeholder State -->
+                <div class="dashboard-placeholder card glass-card" id="dashboard-placeholder">
+                    <div class="placeholder-icon">
+                        <i class="fa-solid fa-chart-line-up"></i>
+                    </div>
+                    <h3>Awaiting Analysis</h3>
+                    <p>Enter text or select an emotion preset in the console to decode the emotional spectrum, sentence
+                        breakdowns, and sentiment analytics.</p>
+                </div>
+
+                <!-- Loading State -->
+                <div class="dashboard-loading card glass-card hidden" id="dashboard-loading">
+                    <div class="spinner-container">
+                        <div class="glowing-spinner"></div>
+                        <p id="analysis-step-text">Processing text...</p>
+                    </div>
+                </div>
+
+                <!-- Analytics Dashboard -->
+                <div class="dashboard-content hidden" id="dashboard-content">
+                    <div class="dashboard-row grid-2-col">
+                        <!-- Dominant Emotion Display -->
+                        <div class="card glass-card dominant-card" id="dominant-emotion-card">
+                            <div class="emotion-glow" id="emotion-glow-bg"></div>
+                            <div class="card-inner">
+                                <span class="card-subtitle">Dominant Emotion</span>
+                                <div class="dominant-display">
+                                    <span class="dominant-emoji" id="dominant-emoji">😐</span>
+                                    <h3 class="dominant-title" id="dominant-title">Neutral</h3>
+                                </div>
+                                <div class="intensity-bar-wrapper">
+                                    <div class="intensity-labels">
+                                        <span>Intensity Score</span>
+                                        <span id="dominant-percentage">0%</span>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div class="progress-fill" id="dominant-fill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <div class="text-dimensions">
+                                    <div class="dimension">
+                                        <span class="val" id="stats-words">0</span>
+                                        <span class="lbl">Words</span>
+                                    </div>
+                                    <div class="dimension border-left">
+                                        <span class="val" id="stats-sentences">0</span>
+                                        <span class="lbl">Sentences</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentiment Summary -->
+                        <div class="card glass-card sentiment-card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-scale-balanced"></i> Sentiment Spectrum</h3>
+                            </div>
+                            <div class="sentiment-bar-container">
+                                <div class="sentiment-meter-labels">
+                                    <span class="neg">Negative</span>
+                                    <span class="neu">Neutral</span>
+                                    <span class="pos">Positive</span>
+                                </div>
+                                <div class="sentiment-meter-bar">
+                                    <div class="sentiment-section neg-section" id="sentiment-fill-neg"
+                                        style="width: 33%"></div>
+                                    <div class="sentiment-section neu-section" id="sentiment-fill-neu"
+                                        style="width: 34%"></div>
+                                    <div class="sentiment-section pos-section" id="sentiment-fill-pos"
+                                        style="width: 33%"></div>
+                                </div>
+                                <div class="sentiment-percentages">
+                                    <span id="sentiment-val-neg">33%</span>
+                                    <span id="sentiment-val-neu">34%</span>
+                                    <span id="sentiment-val-pos">33%</span>
+                                </div>
+                            </div>
+                            <div class="sentiment-verdict" id="sentiment-verdict-text">
+                                The overall sentiment leans neutral.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emotion Breakdown Bar Chart -->
+                    <div class="card glass-card chart-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chart-simple"></i> Detailed Emotion Profile</h3>
+                        </div>
+                        <div class="chart-container" id="emotion-chart-container">
+                            <!-- Custom HTML Bar Chart, animated and rendered via JS -->
+                            <div class="chart-bar-row" data-emotion="joy">
+                                <span class="chart-bar-label"><span class="emoji-indicator">😊</span> Joy</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill joy-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                            <div class="chart-bar-row" data-emotion="sadness">
+                                <span class="chart-bar-label"><span class="emoji-indicator">😢</span> Sadness</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill sadness-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                            <div class="chart-bar-row" data-emotion="anger">
+                                <span class="chart-bar-label"><span class="emoji-indicator">😠</span> Anger</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill anger-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                            <div class="chart-bar-row" data-emotion="fear">
+                                <span class="chart-bar-label"><span class="emoji-indicator">😨</span> Fear</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill fear-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                            <div class="chart-bar-row" data-emotion="surprise">
+                                <span class="chart-bar-label"><span class="emoji-indicator">😲</span> Surprise</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill surprise-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                            <div class="chart-bar-row" data-emotion="disgust">
+                                <span class="chart-bar-label"><span class="emoji-indicator">🤢</span> Disgust</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill disgust-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                            <div class="chart-bar-row" data-emotion="neutral">
+                                <span class="chart-bar-label"><span class="emoji-indicator">😐</span> Neutral</span>
+                                <div class="chart-bar-track">
+                                    <div class="chart-bar-fill neutral-fill" style="width: 0%"></div>
+                                </div>
+                                <span class="chart-bar-value">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sentence Analysis Section -->
+                    <div class="card glass-card sentence-section-card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-quote-left"></i> Sentence-by-Sentence Breakdown</h3>
+                            <span class="info-badge">Click any sentence to isolate its emotional profile</span>
+                        </div>
+                        <div class="sentence-layout">
+                            <!-- Left: Colored sentence-tagged block -->
+                            <div class="sentences-block" id="sentences-wrapper">
+                                <!-- Rendered dynamically by JS -->
+                            </div>
+                            <!-- Right: Isolated sentence details -->
+                            <div class="sentence-inspector" id="sentence-inspector">
+                                <div class="inspector-empty-state" id="inspector-placeholder">
+                                    <i class="fa-solid fa-arrows-to-eye"></i>
+                                    <p>Select a sentence on the left to inspect its granular emotional metrics.</p>
+                                </div>
+                                <div class="inspector-detail hidden" id="inspector-detail">
+                                    <span class="inspector-title">Sentence Focus</span>
+                                    <p class="inspector-text" id="inspector-sentence-text">"Example sentence."</p>
+                                    <div class="inspector-badge" id="inspector-sentence-dominant">Joy</div>
+                                    <div class="inspector-chart" id="inspector-mini-chart">
+                                        <!-- Mini chart fills injected here by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Actions -->
+                    <div class="dashboard-actions">
+                        <button id="export-btn" class="btn btn-secondary"><i class="fa-solid fa-file-pdf"></i> Export
+                            Analytics Report</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer-bar">
+            <p>Day 28 // 30 Days of Web Development Challenge // NLP Flask Sentiment Engine</p>
+        </footer>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
